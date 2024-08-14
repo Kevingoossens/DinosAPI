@@ -16,29 +16,23 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+// Liste de dinosaures avec leurs caractéristiques
 var dinosaures = new[]
 {
-    "T-rex", "Vélociraptor", "Brachiosaures", "Mosasaure"
+    new Dinosaur("T-rex", "Crétacé", "12m"),
+    new Dinosaur("Vélociraptor", "Crétacé", "2m"),
+    new Dinosaur("Brachiosaures", "Jurassique", "21m"),
+    new Dinosaur("Mosasaure", "Crétacé", "25m")
 };
 
 app.MapGet("/Dinosaures", () =>
- {
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            dinosaures[Random.Shared.Next(dinosaures.Length)]
-        ))
-        .ToArray();
-    return forecast;
- })
+{
+    return dinosaures;
+})
 .WithName("Dinosaures")
 .WithOpenApi();
 
 app.Run();
 
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
+// Modèle Dinosaur avec des propriétés pertinentes
+record Dinosaur(string Name, string Period, string Size);
