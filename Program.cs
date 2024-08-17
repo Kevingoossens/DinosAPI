@@ -27,6 +27,7 @@ var dinosaures = new[]
     new Dinosaur("Triceratops", "Crétacé", "Herbivore", "3m", "10m", "10t", "North America"),
     new Dinosaur("Parasaurolophus", "Crétacé", "Herbivore", "4m", "10m", "5t", "North America"),
     new Dinosaur("Compsognathus", "Jurassique", "Carnivore", "30cm", "1m", "3,5kg", "Europe"),
+    new Dinosaur("Stegosaurus", "Jurassique", "Herbivore", "4m", "9m", "4t", "Morrison Formation")
     // new Dinosaur("")
 };
 
