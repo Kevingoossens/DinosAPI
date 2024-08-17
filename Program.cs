@@ -27,8 +27,10 @@ var dinosaures = new[]
     new Dinosaur("Triceratops", "Crétacé", "Herbivore", "3m", "10m", "10t", "North America"),
     new Dinosaur("Parasaurolophus", "Crétacé", "Herbivore", "4m", "10m", "5t", "North America"),
     new Dinosaur("Compsognathus", "Jurassique", "Carnivore", "30cm", "1m", "3,5kg", "Europe"),
-    new Dinosaur("Stegosaurus", "Jurassique", "Herbivore", "4m", "9m", "4t", "Morrison Formation")
-    // new Dinosaur("")
+    new Dinosaur("Stegosaurus", "Jurassique", "Herbivore", "4m", "9m", "4t", "Morrison Formation"),
+    new Dinosaur("Spinosaurus", "Crétacé", "Carnivore", "7m", "15m", "10t", "North Africa"),
+    new Dinosaur("Mosasaurus", "Crétacé", "Carnivore", "20m", "2m", "10t", " Sea of Europe, North America, Africa, Australia, New-Zélande"),
+    new Dinosaur("Baryonyx", "Crétacé", "Carnivore", "2,5m", "9,5m", "2,5t", "England, Spain")  
 };
 
 app.MapGet("/Dinosaures", () =>
