@@ -1,12 +1,16 @@
+using Microsoft.EntityFrameworkCore; // Assure-toi que cet espace de noms est présent
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Ajouter le contexte de la base de données avec SQLite
+builder.Services.AddDbContext<DinosaurContext>(options =>
+    options.UseSqlite("Data Source=dinosapi.db"));
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -15,73 +19,76 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// Liste de dinosaures avec leurs caractéristiques
-var dinosaures = new[]
+// Route GET pour obtenir tous les dinosaures
+app.MapGet("/dinosaurs", async (DinosaurContext db) =>
 {
-    new Dinosaur("T-rex", "Crétacé", "Carnivore", "4m", "14m", "7t", "North America"),
-    new Dinosaur("Vélociraptor", "Crétacé", "Carnivore", "2m", "3m", "136kg", "USA, Canada, Mongolie"),
-    new Dinosaur("Brachiosaurus", "Jurassique", "Herbivore", "20m", "30m", "60t", "North America, Portugal, Tanzani"),
-    new Dinosaur("Dilophosaurus", "Jurassique", "Carnivore", "2m", "6m", "1t", "Arizona"),
-    new Dinosaur("Gallimimus", "Crétacé", "Herbivore", "2m", "8m", "440kg", "Mongolie"),
-    new Dinosaur("Triceratops", "Crétacé", "Herbivore", "3m", "10m", "10t", "North America"),
-    new Dinosaur("Parasaurolophus", "Crétacé", "Herbivore", "4m", "10m", "5t", "North America"),
-    new Dinosaur("Compsognathus", "Jurassique", "Carnivore", "30cm", "1m", "3,5kg", "Europe"),
-    new Dinosaur("Stegosaurus", "Jurassique", "Herbivore", "4m", "9m", "4t", "Morrison Formation"),
-    new Dinosaur("Spinosaurus", "Crétacé", "Carnivore", "7m", "15m", "10t", "North Africa"),
-    new Dinosaur("Mosasaurus", "Crétacé", "Carnivore", "20m", "2m", "10t", "Sea of Europe, North America, Africa, Australia, New-Zealand"),
-    new Dinosaur("Baryonyx", "Crétacé", "Carnivore", "2,5m", "9,5m", "2,5t", "England, Spain")  
-};
+    // Utilise le contexte de la base de données pour obtenir tous les dinosaures.
+    // ToListAsync() récupère tous les dinosaures de la table 'Dinosaurs' et les convertit en liste.
+    return await db.Dinosaurs.ToListAsync();
+});
 
-// Intégration du paramètres de recherche "Get" avec recherche insensible à la casse
-app.MapGet("/Dinosaures/search", (string? name, string? period, string? feed) =>
+// Route GET pour obtenir un dinosaure spécifique par ID
+app.MapGet("/dinosaurs/{id}", async (int id, DinosaurContext db) =>
 {
-    var filteredDinos = dinosaures.AsEnumerable();
+    // Recherche un dinosaure par ID dans la base de données.
+    // FindAsync(id) trouve le dinosaure avec l'ID spécifié.
+    var dinosaur = await db.Dinosaurs.FindAsync(id);
+    // Vérifie si le dinosaure est trouvé ou non.
+    // Si trouvé, retourne une réponse HTTP 200 (OK) avec les détails du dinosaure.
+    // Sinon, retourne une réponse HTTP 404 (Not Found).
+    return dinosaur is not null ? Results.Ok(dinosaur) : Results.NotFound();
+});
 
-    if (!string.IsNullOrWhiteSpace(name))
-    {
-        filteredDinos = filteredDinos.Where(d => d.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
-    }
-
-    if (!string.IsNullOrWhiteSpace(period))
-    {
-        filteredDinos = filteredDinos.Where(d => d.Period.Equals(period, StringComparison.OrdinalIgnoreCase));
-    }
-
-    if (!string.IsNullOrWhiteSpace(feed))
-    {
-        filteredDinos = filteredDinos.Where(d => d.Feed.Equals(feed, StringComparison.OrdinalIgnoreCase));
-    }
-
-    return filteredDinos.Any() ? Results.Ok(filteredDinos) : Results.NotFound(new { Message = "No dinosaurs found with the given criteria" });
-})
-
-// Affiche les listes voulue pour facilité la recherhce
-.WithName("SearchDinosaures")
-.WithOpenApi();
-
-app.MapGet("/Dinosaures/names", () =>
+// Route POST pour ajouter un nouveau dinosaure
+app.MapPost("/dinosaurs", async (Dinosaur dinosaur, DinosaurContext db) =>
 {
-    var names = dinosaures.Select(d => d.Name).Distinct().ToList();
-    return Results.Ok(names);
-})
-.WithName("GetDinosaurNames")
-.WithOpenApi();
+    // Ajoute le dinosaure reçu dans la base de données.
+    db.Dinosaurs.Add(dinosaur);
+    // Sauvegarde les changements dans la base de données.
+    await db.SaveChangesAsync();
+    // Retourne une réponse HTTP 201 (Created) avec l'URL du nouvel objet et les détails du dinosaure.
+    return Results.Created($"/dinosaurs/{dinosaur.Id}", dinosaur);
+});
 
-app.MapGet("/Dinosaures/periods", () =>
+// Route PUT pour mettre à jour un dinosaure existant
+app.MapPut("/dinosaurs/{id}", async (int id, Dinosaur inputDinosaur, DinosaurContext db) =>
 {
-    var periods = dinosaures.Select(d => d.Period).Distinct().ToList();
-    return Results.Ok(periods);
-})
-.WithName("GetDinosaurPeriods")
-.WithOpenApi();
+    // Recherche un dinosaure par ID dans la base de données.
+    var dinosaur = await db.Dinosaurs.FindAsync(id);
+    // Vérifie si le dinosaure existe.
+    // Si le dinosaure n'existe pas, retourne une réponse HTTP 404 (Not Found).
+    if (dinosaur is null) return Results.NotFound();
 
-app.MapGet("/Dinosaures/feeds", () =>
+    // Met à jour les propriétés du dinosaure avec les nouvelles valeurs fournies.
+    dinosaur.Name = inputDinosaur.Name;
+    dinosaur.Period = inputDinosaur.Period;
+    dinosaur.Feed = inputDinosaur.Feed;
+    dinosaur.Height = inputDinosaur.Height;
+    dinosaur.Length = inputDinosaur.Length;
+    dinosaur.Weight = inputDinosaur.Weight;
+    dinosaur.Location = inputDinosaur.Location;
+
+    // Sauvegarde les changements dans la base de données.
+    await db.SaveChangesAsync();
+    // Retourne une réponse HTTP 200 (OK) avec les détails du dinosaure mis à jour.
+    return Results.Ok(dinosaur);
+});
+
+// Route DELETE pour supprimer un dinosaure par ID
+app.MapDelete("/dinosaurs/{id}", async (int id, DinosaurContext db) =>
 {
-    var feeds = dinosaures.Select(d => d.Feed).Distinct().ToList();
-    return Results.Ok(feeds);
-})
-.WithName("GetDinosaurFeeds")
-.WithOpenApi();
+    // Recherche un dinosaure par ID dans la base de données.
+    var dinosaur = await db.Dinosaurs.FindAsync(id);
+    // Vérifie si le dinosaure existe.
+    // Si le dinosaure n'existe pas, retourne une réponse HTTP 404 (Not Found).
+    if (dinosaur is null) return Results.NotFound();
+
+    // Supprime le dinosaure de la base de données.
+    db.Dinosaurs.Remove(dinosaur);
+    // Sauvegarde les changements dans la base de données.
+    await db.SaveChangesAsync();
+    // Retourne une réponse HTTP 204 (No Content) indiquant que la suppression a été effectuée avec succès.
+    return Results.NoContent();
+});
 
 app.Run();
-record Dinosaur(string Name, string Period, string Feed, string Height, string Length, string Weight, string Location);
