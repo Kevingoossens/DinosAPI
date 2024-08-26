@@ -1,16 +1,18 @@
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-public class DinosaurContext : DbContext
+public class DinosaurContext : IdentityDbContext<User>
 {
-    public DinosaurContext(DbContextOptions<DinosaurContext> options) : base(options) { }
+    public DinosaurContext(DbContextOptions<DinosaurContext> options)
+        : base(options)
+    {
+    }
 
     public DbSet<Dinosaur> Dinosaurs { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-
-        // Ajouter des données initiales
         modelBuilder.Entity<Dinosaur>().HasData(
             new Dinosaur { Id = 1, Name = "T-rex", Period = "Crétacé", Feed = "Carnivore", Height = "4m", Length = "14m", Weight = "7t", Location = "North America" },
             new Dinosaur { Id = 2, Name = "Vélociraptor", Period = "Crétacé", Feed = "Carnivore", Height = "2m", Length = "3m", Weight = "136kg", Location = "USA, Canada, Mongolie" },
