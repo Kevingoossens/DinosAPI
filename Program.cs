@@ -45,7 +45,7 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build(); // Construire l'application
 
-
+// Démarre Swagger
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -102,7 +102,6 @@ app.MapGet("/dinosaurs/search/feed/{feed}", async (string feed, DinosaurContext 
     return dinosaurs.Any() ? Results.Ok(dinosaurs) : Results.NotFound();
 });
 
-// Route POST pour ajouter un nouveau dinosaure (protéger par authentification)
 // Route POST pour ajouter un nouveau dinosaure (protéger par authentification)
 app.MapPost("/dinosaurs", async (Dinosaur dinosaur, DinosaurContext db, HttpContext context) =>
 {
