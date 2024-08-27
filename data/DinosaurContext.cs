@@ -3,16 +3,22 @@ using Microsoft.EntityFrameworkCore;
 
 public class DinosaurContext : IdentityDbContext<User>
 {
+    // Constructeur qui passe les options de contexte à la classe de base (IdentityDbContext)
     public DinosaurContext(DbContextOptions<DinosaurContext> options)
         : base(options)
     {
     }
 
+    // DbSet représentant la table des dinosaures dans la base de données
     public DbSet<Dinosaur> Dinosaurs { get; set; }
 
+    // Méthode pour configurer le modèle de données, ajoutant des données initiales
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        // Appel de la méthode de base pour garantir que les configurations de l'Identity sont appliquées
         base.OnModelCreating(modelBuilder);
+
+        // Configuration des données initiales pour la table des dinosaures
         modelBuilder.Entity<Dinosaur>().HasData(
             new Dinosaur { Id = 1, Name = "T-rex", Period = "Crétacé", Feed = "Carnivore", Height = "4m", Length = "14m", Weight = "7t", Location = "North America" },
             new Dinosaur { Id = 2, Name = "Vélociraptor", Period = "Crétacé", Feed = "Carnivore", Height = "2m", Length = "3m", Weight = "136kg", Location = "USA, Canada, Mongolie" },
