@@ -103,18 +103,40 @@ app.MapGet("/dinosaurs/search/feed/{feed}", async (string feed, DinosaurContext 
 });
 
 // Route POST pour ajouter un nouveau dinosaure (protéger par authentification)
-app.MapPost("/dinosaurs", [Authorize] async (Dinosaur dinosaur, DinosaurContext db) =>
+// Route POST pour ajouter un nouveau dinosaure (protéger par authentification)
+app.MapPost("/dinosaurs", async (Dinosaur dinosaur, DinosaurContext db, HttpContext context) =>
 {
+    // Vérification si l'utilisateur est authentifié
+    if (!context.User.Identity.IsAuthenticated)
+    {
+        return Results.Unauthorized(); // 401 Unauthorized
+    }
+
+    // Ajoute le dinosaure à la base de données
     db.Dinosaurs.Add(dinosaur);
     await db.SaveChangesAsync();
+    
+    // Retourne une réponse HTTP 201 (Created) avec l'URL du nouvel objet et les détails du dinosaure
     return Results.Created($"/dinosaurs/{dinosaur.Id}", dinosaur);
 });
 
 // Route PUT pour mettre à jour un dinosaure existant (protéger par authentification)
-app.MapPut("/dinosaurs/{id}", [Authorize] async (int id, Dinosaur inputDinosaur, DinosaurContext db) =>
+app.MapPut("/dinosaurs/{id}", async (int id, Dinosaur inputDinosaur, DinosaurContext db, HttpContext context) =>
 {
+    // Vérification si l'utilisateur est authentifié
+    if (!context.User.Identity.IsAuthenticated)
+    {
+        return Results.Unauthorized(); // 401 Unauthorized
+    }
+
+    // Recherche du dinosaure par ID
     var dinosaur = await db.Dinosaurs.FindAsync(id);
-    if (dinosaur is null) return Results.NotFound();
+    
+    // Si le dinosaure n'est pas trouvé, retourner une 404
+    if (dinosaur is null)
+    {
+        return Results.NotFound("Dinosaur not found."); // 404 Not Found
+    }
 
     dinosaur.Name = inputDinosaur.Name;
     dinosaur.Period = inputDinosaur.Period;
@@ -125,18 +147,35 @@ app.MapPut("/dinosaurs/{id}", [Authorize] async (int id, Dinosaur inputDinosaur,
     dinosaur.Location = inputDinosaur.Location;
 
     await db.SaveChangesAsync();
+    
+    // Retourner un code 204 No Content pour indiquer que la suppression a été effectuée avec succès
     return Results.Ok(dinosaur);
 });
 
 // Route DELETE pour supprimer un dinosaure par ID (protéger par authentification)
-app.MapDelete("/dinosaurs/{id}", [Authorize] async (int id, DinosaurContext db) =>
+app.MapDelete("/dinosaurs/{id}", async (int id, DinosaurContext db, HttpContext context) =>
 {
-    var dinosaur = await db.Dinosaurs.FindAsync(id);
-    if (dinosaur is null) return Results.NotFound();
+    // Vérification si l'utilisateur est authentifié
+    if (!context.User.Identity.IsAuthenticated)
+    {
+        return Results.Unauthorized(); // 401 Unauthorized
+    }
 
+    // Recherche du dinosaure par ID
+    var dinosaur = await db.Dinosaurs.FindAsync(id);
+    
+    // Si le dinosaure n'est pas trouvé, retourner une 404
+    if (dinosaur is null)
+    {
+        return Results.NotFound("Dinosaur not found."); // 404 Not Found
+    }
+
+    // Suppression du dinosaure
     db.Dinosaurs.Remove(dinosaur);
     await db.SaveChangesAsync();
-    return Results.NoContent();
+    
+    // Retourner un code 204 No Content pour indiquer que la suppression a été effectuée avec succès
+    return Results.NoContent(); 
 });
 
 app.Run(); // Exécuter l'application
