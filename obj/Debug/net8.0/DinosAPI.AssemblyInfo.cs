@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("DinosAPI")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b984bbdbd949235fa9f85e6db2193326c57f6d21")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0bee64448bf224e889dd963bf94fbc84f136cee9")]
 [assembly: System.Reflection.AssemblyProductAttribute("DinosAPI")]
 [assembly: System.Reflection.AssemblyTitleAttribute("DinosAPI")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -67,14 +67,14 @@ public class AuthController : ControllerBase
 // Modèle de données pour l'enregistrement d'un utilisateur
 public class RegisterModel
 {
-    public string Username { get; set; }
-    public string Email { get; set; }
-    public string Password { get; set; }
+    public string? Username { get; set; }
+    public string? Email { get; set; }
+    public string? Password { get; set; }
 }
 
 // Modèle de données pour la connexion d'un utilisateur
 public class LoginModel
 {
-    public string Username { get; set; }
-    public string Password { get; set; }
+    public string? Username { get; set; }
+    public string? Password { get; set; }
 }
