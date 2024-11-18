@@ -63,20 +63,20 @@ app.UseAuthorization();
 app.MapControllers(); // Utilise les contrôleurs pour gérer les routes HTTP
 
 // Route GET pour obtenir tous les dinosaures
-app.MapGet("/dinosaurs", async (DinosaurContext db) =>
+app.MapGet("Get all dinosaurs", async (DinosaurContext db) =>
 {
     return await db.Dinosaurs.ToListAsync();
 });
 
 // Route GET pour obtenir un dinosaure spécifique par ID
-app.MapGet("/dinosaurs/{id}", async (int id, DinosaurContext db) =>
+app.MapGet("Search dinosaurs by {id}", async (int id, DinosaurContext db) =>
 {
     var dinosaur = await db.Dinosaurs.FindAsync(id);
     return dinosaur is not null ? Results.Ok(dinosaur) : Results.NotFound();
 });
 
 // GET by Name (insensible à la casse) pour obtenir un dinosaure spécifique par nom
-app.MapGet("/dinosaurs/search/name/{name}", async (string name, DinosaurContext db) =>
+app.MapGet("Search dinosaurs by name", async (string name, DinosaurContext db) =>
 {
     var dinosaurs = await db.Dinosaurs
         .Where(d => d.Name.ToLower().Contains(name.ToLower()))
@@ -85,7 +85,7 @@ app.MapGet("/dinosaurs/search/name/{name}", async (string name, DinosaurContext 
 });
 
 // GET by Period (insensible à la casse) pour obtenir un dinosaure spécifique par période
-app.MapGet("/dinosaurs/search/period/{period}", async (string period, DinosaurContext db) =>
+app.MapGet("Search dinosaurs by period", async (string period, DinosaurContext db) =>
 {
     var dinosaurs = await db.Dinosaurs
         .Where(d => d.Period.ToLower().Contains(period.ToLower()))
@@ -94,7 +94,7 @@ app.MapGet("/dinosaurs/search/period/{period}", async (string period, DinosaurCo
 });
 
 // GET by Feed (insensible à la casse) pour obtenir un dinosaure spécifique par type d'alimentation
-app.MapGet("/dinosaurs/search/feed/{feed}", async (string feed, DinosaurContext db) =>
+app.MapGet("Search Dinosaurs by feed", async (string feed, DinosaurContext db) =>
 {
     var dinosaurs = await db.Dinosaurs
         .Where(d => d.Feed.ToLower().Contains(feed.ToLower()))
@@ -103,30 +103,35 @@ app.MapGet("/dinosaurs/search/feed/{feed}", async (string feed, DinosaurContext 
 });
 
 // Route POST pour ajouter un nouveau dinosaure (protéger par authentification)
-app.MapPost("/dinosaurs", async (Dinosaur dinosaur, DinosaurContext db, HttpContext context) =>
+app.MapPost("Post new dinosaurs", async (Dinosaur dinosaur, DinosaurContext db, HttpContext context) =>
 {
     // Vérification si l'utilisateur est authentifié
+#pragma warning disable CS8602 // Déréférencement d'une éventuelle référence null.
     if (!context.User.Identity.IsAuthenticated)
     {
         return Results.Unauthorized(); // 401 Unauthorized
     }
+#pragma warning restore CS8602 // Déréférencement d'une éventuelle référence null.
 
     // Ajoute le dinosaure à la base de données
     db.Dinosaurs.Add(dinosaur);
     await db.SaveChangesAsync();
     
-    // Retourne une réponse HTTP 201 (Created) avec l'URL du nouvel objet et les détails du dinosaure
+    // Retourne une réponse HTTP 201 "Created" avec l'URL du nouvel objet et les détails du dinosaure
     return Results.Created($"/dinosaurs/{dinosaur.Id}", dinosaur);
 });
 
 // Route PUT pour mettre à jour un dinosaure existant (protéger par authentification)
-app.MapPut("/dinosaurs/{id}", async (int id, Dinosaur inputDinosaur, DinosaurContext db, HttpContext context) =>
+app.MapPut("Modify dinosaurs by {id}", async (int id, Dinosaur inputDinosaur, DinosaurContext db, HttpContext context) =>
 {
-    // Vérification si l'utilisateur est authentifié
+
+// Vérification si l'utilisateur est authentifié
+#pragma warning disable CS8602 // Déréférencement d'une éventuelle référence null.
     if (!context.User.Identity.IsAuthenticated)
     {
         return Results.Unauthorized(); // 401 Unauthorized
     }
+#pragma warning restore CS8602 // Déréférencement d'une éventuelle référence null.
 
     // Recherche du dinosaure par ID
     var dinosaur = await db.Dinosaurs.FindAsync(id);
@@ -147,18 +152,21 @@ app.MapPut("/dinosaurs/{id}", async (int id, Dinosaur inputDinosaur, DinosaurCon
 
     await db.SaveChangesAsync();
     
-    // Retourner un code 204 No Content pour indiquer que la suppression a été effectuée avec succès
+    // Retourner un code 204 "OK" pour indiquer que la modification a été effectuée avec succès
     return Results.Ok(dinosaur);
 });
 
 // Route DELETE pour supprimer un dinosaure par ID (protéger par authentification)
-app.MapDelete("/dinosaurs/{id}", async (int id, DinosaurContext db, HttpContext context) =>
+app.MapDelete("Delete dinosaurs by {id}", async (int id, DinosaurContext db, HttpContext context) =>
 {
-    // Vérification si l'utilisateur est authentifié
+
+// Vérification si l'utilisateur est authentifié
+#pragma warning disable CS8602 // Déréférencement d'une éventuelle référence null.
     if (!context.User.Identity.IsAuthenticated)
     {
         return Results.Unauthorized(); // 401 Unauthorized
     }
+#pragma warning restore CS8602 // Déréférencement d'une éventuelle référence null.
 
     // Recherche du dinosaure par ID
     var dinosaur = await db.Dinosaurs.FindAsync(id);
@@ -173,7 +181,7 @@ app.MapDelete("/dinosaurs/{id}", async (int id, DinosaurContext db, HttpContext 
     db.Dinosaurs.Remove(dinosaur);
     await db.SaveChangesAsync();
     
-    // Retourner un code 204 No Content pour indiquer que la suppression a été effectuée avec succès
+    // Retourner un code 204 "No Content" pour indiquer que la suppression a été effectuée avec succès
     return Results.NoContent(); 
 });
 

@@ -17,14 +17,16 @@ public class AuthController : ControllerBase
     }
 
     // Route POST pour l'enregistrement d'un nouvel utilisateur
-    [HttpPost("register")]
+    [HttpPost("Register")]
     public async Task<IActionResult> Register([FromBody] RegisterModel model)
     {
         // Création d'un nouvel utilisateur avec le nom d'utilisateur et l'email fournis
         var user = new User { UserName = model.Username, Email = model.Email };
-        
+
         // Création de l'utilisateur avec le mot de passe fourni
+#pragma warning disable CS8604 // Existence possible d'un argument de référence null.
         var result = await _userManager.CreateAsync(user, model.Password);
+#pragma warning restore CS8604 // Existence possible d'un argument de référence null.
 
         // Si la création de l'utilisateur est réussie, l'utilisateur est connecté et une réponse OK est renvoyée
         if (result.Succeeded)
@@ -38,11 +40,13 @@ public class AuthController : ControllerBase
     }
 
     // Route POST pour la connexion d'un utilisateur
-    [HttpPost("login")]
+    [HttpPost("Login")]
     public async Task<IActionResult> Login([FromBody] LoginModel model)
     {
         // Tentative de connexion de l'utilisateur avec le nom d'utilisateur et le mot de passe fournis
+#pragma warning disable CS8604 // Existence possible d'un argument de référence null.
         var result = await _signInManager.PasswordSignInAsync(model.Username, model.Password, isPersistent: false, lockoutOnFailure: false);
+#pragma warning restore CS8604 // Existence possible d'un argument de référence null.
 
         // Si la connexion est réussie, renvoie une réponse OK
         if (result.Succeeded)
@@ -55,7 +59,7 @@ public class AuthController : ControllerBase
     }
 
     // Route POST pour la déconnexion d'un utilisateur
-    [HttpPost("logout")]
+    [HttpPost("Logout")]
     public async Task<IActionResult> Logout()
     {
         // Déconnexion de l'utilisateur courant
